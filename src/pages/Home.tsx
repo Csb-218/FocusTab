@@ -16,6 +16,7 @@ import DailySummaryBox from "../components/DailySummaryBox/DailySummaryBox";
 import SuperFocusMode from "../components/SuperFocusMode/SuperFocusMode";
 import ExtensionDisabledCover from "../components/ExtensionDisableCover/ExtensionDisabledCover";
 import HomePageHeader from "../components/HomePageHeader/HomePageHeader";
+import FocusMusic from "../components/FocusMusic/FocusMusic"
 
 interface HomeProps {
   isFocused: boolean;
@@ -111,6 +112,7 @@ export default function Home({ isFocused, setIsFocused }: HomeProps) {
         ></UsageBreakdown>
         <div className="home_page__usage__line"></div>
         <SuperFocusMode></SuperFocusMode>
+        <FocusMusic/>
         <div className="home_page__usage__line"></div>
         <HourlySummaryBox></HourlySummaryBox>
         <div className="home_page__usage__line"></div>
