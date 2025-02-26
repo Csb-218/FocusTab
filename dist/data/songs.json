@@ -1,0 +1,44 @@
+[
+    {
+      "id": 1,
+      "title": "snow wind",
+      "artist": "GFX sounds",
+      "url": "https://res.cloudinary.com/dz3aj0ti8/video/upload/v1740589107/icy-snowstorm-wind-gfx-sounds-1-1-01-31_ci7bhn.mp3"
+    },
+    {
+      "id": 2,
+      "title": "Nature birds",
+      "artist": "GFX sounds",
+      "url": "https://res.cloudinary.com/dz3aj0ti8/video/upload/v1740589113/forest-wildlife-bird-ambience-gfx-sounds-2-2-02-31_m2a2hc.mp3"
+    },
+    {
+      "id": 3,
+      "title": "Ocean waves",
+      "artist": "Ivo Vicic",
+      "url": "https://res.cloudinary.com/dz3aj0ti8/video/upload/v1740589135/ocean-waves-on-beach-calm-gamemaster-audio-3-00-14_djmywa.mp3"
+    },
+    {
+      "id": 4,
+      "title": "Garden Morning",
+      "artist": "GFX sounds",
+      "url": "https://res.cloudinary.com/dz3aj0ti8/video/upload/v1740591132/mixkit-morning-sound-in-a-garden-2464_pjgnyl.wav"
+    },
+    {
+      "id": 5,
+      "title": "Urban Ambience",
+      "artist": "GFX sounds",
+      "url": "https://res.cloudinary.com/dz3aj0ti8/video/upload/v1740591113/mixkit-urban-ambient-sound-2465_wvsokv.wav"
+    },
+    {
+      "id": 6,
+      "title": "Calm Thunderstorm",
+      "artist": "GFX sounds",
+      "url": "https://res.cloudinary.com/dz3aj0ti8/video/upload/v1740591114/mixkit-calm-thunderstorm-in-the-jungle-2415_zq2r1t.wav"
+    },
+    {
+      "id": 7,
+      "title": "Campfire Night",
+      "artist": "GFX sounds",
+      "url": "https://res.cloudinary.com/dz3aj0ti8/video/upload/v1740591104/mixkit-campfire-night-wind-1736_eymqvu.wav"
+    }
+]
