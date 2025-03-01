@@ -985,6 +985,108 @@ var background_awaiter = (undefined && undefined.__awaiter) || function (thisArg
 
 
 let webTime;
+let hasOffscreen = false;
+function createOffscreenDocument(path) {
+    return background_awaiter(this, void 0, void 0, function* () {
+        if (hasOffscreen)
+            return;
+        try {
+            const offscreenUrl = chrome.runtime.getURL(path);
+            const existingContexts = yield chrome.runtime.getContexts({
+                contextTypes: [chrome.runtime.ContextType.OFFSCREEN_DOCUMENT],
+                documentUrls: [offscreenUrl]
+            });
+            if (existingContexts.length > 0) {
+                hasOffscreen = true;
+                return;
+            }
+            yield chrome.offscreen.createDocument({
+                url: path,
+                reasons: ['AUDIO_PLAYBACK', 'BLOBS'],
+                justification: 'Playing focus music and managing audio state'
+            });
+            hasOffscreen = true;
+            console.log('Created offscreen document');
+        }
+        catch (error) {
+            console.error('Failed to create offscreen document:', error);
+        }
+    });
+}
+// Handle messages from FocusMusic.tsx
+chrome.runtime.onMessage.addListener((request, sender, sendResponse) => background_awaiter(void 0, void 0, void 0, function* () {
+    console.log(yield chrome.runtime.getContexts({}));
+    if (request.target !== "background")
+        return;
+    try {
+        yield createOffscreenDocument('html/offscreen.html');
+        switch (request.type) {
+            case 'play':
+                yield chrome.runtime.sendMessage({
+                    type: 'play',
+                    target: "offscreen",
+                    source: "background",
+                    url: request.url,
+                    volume: 0.9
+                });
+                break;
+            case 'pause':
+                yield chrome.runtime.sendMessage({
+                    type: 'pause',
+                    target: "offscreen",
+                    source: "background"
+                });
+                break;
+            case 'loop':
+                yield chrome.runtime.sendMessage({
+                    type: 'loop',
+                    target: "offscreen",
+                    source: "background",
+                    enabled: request.enabled
+                });
+                break;
+            case 'GET_AUDIO_STATE':
+                yield chrome.runtime.sendMessage({
+                    type: 'GET_STATE',
+                    target: "offscreen",
+                    source: "background"
+                });
+                break;
+        }
+        sendResponse({ success: true });
+    }
+    catch (error) {
+        console.error('Failed to handle music control:', error);
+        sendResponse({ success: false, error: String(error) });
+    }
+    return true;
+}));
+// Handle messages from offscreen document
+chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
+    console.log('Background received message:', message);
+    if (message.source === "offscreen") {
+        // Forward audio state to popup
+        chrome.runtime.sendMessage(Object.assign(Object.assign({}, message), { target: "popup", source: "background" }));
+    }
+    // Handle GET_AUDIO_STATE request from popup
+    if (message.type === 'GET_AUDIO_STATE' && message.source === 'popup') {
+        chrome.runtime.sendMessage({
+            type: 'GET_STATE',
+            target: "offscreen",
+            source: "background"
+        });
+    }
+    return true;
+});
+chrome.runtime.onMessage.addListener((message) => background_awaiter(void 0, void 0, void 0, function* () {
+    if (message.type === 'DOCUMENT_CLOSED') {
+        hasOffscreen = false;
+        // Recreate if audio is still playing
+        if (message.isPlaying) {
+            yield createOffscreenDocument('html/offscreen.html');
+        }
+    }
+}));
 chrome.runtime.onMessage.addListener(function (request, sender, sendResponse) {
     var _a;
     if (request.redirect) {
