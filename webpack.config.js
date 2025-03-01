@@ -12,6 +12,7 @@ module.exports = [
       content: "./src/content.ts",
       superfocus: "./src/html/superfocus.ts",
       blocked: "./src/html/blocked.ts",
+      offscreen: "./src/html/offscreen.ts",
     },
     mode: "production",
     optimization: {
