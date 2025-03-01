@@ -4,6 +4,124 @@ import { WebTime } from "./utils/main/WebTime";
 
 let webTime: WebTime | undefined;
 
+let hasOffscreen = false;
+
+async function createOffscreenDocument(path: string) {
+  if (hasOffscreen) return;
+  
+  try {
+    const offscreenUrl = chrome.runtime.getURL(path);
+    const existingContexts = await chrome.runtime.getContexts({
+      contextTypes: [chrome.runtime.ContextType.OFFSCREEN_DOCUMENT],
+      documentUrls: [offscreenUrl]
+    });
+
+    if (existingContexts.length > 0) {
+      hasOffscreen = true;
+      return;
+    }
+
+    await chrome.offscreen.createDocument({
+      url: path,
+      reasons: ['AUDIO_PLAYBACK', 'BLOBS'] as chrome.offscreen.Reason[],
+      justification: 'Playing focus music and managing audio state'
+    });
+    hasOffscreen = true;
+    console.log('Created offscreen document');
+  } catch (error) {
+    console.error('Failed to create offscreen document:', error);
+  }
+}
+
+// Handle messages from FocusMusic.tsx
+chrome.runtime.onMessage.addListener(async (request, sender, sendResponse) => {
+
+  console.log(await chrome.runtime.getContexts({}))
+
+  if(request.target !== "background") return;
+
+  try {
+    await createOffscreenDocument('html/offscreen.html');
+    
+    switch (request.type) {
+      case 'play':
+        await chrome.runtime.sendMessage({
+          type: 'play',
+          target: "offscreen",
+          source: "background",
+          url: request.url,
+          volume: 0.9
+        });
+        break;
+
+      case 'pause':
+        await chrome.runtime.sendMessage({
+          type: 'pause',
+          target: "offscreen",
+          source: "background"
+        });
+        break;
+
+      case 'loop':
+        await chrome.runtime.sendMessage({
+          type: 'loop',
+          target: "offscreen",
+          source: "background",
+          enabled: request.enabled
+        });
+        break;
+
+      case 'GET_AUDIO_STATE':
+        await chrome.runtime.sendMessage({
+          type: 'GET_STATE',
+          target: "offscreen",
+          source: "background"
+        });
+        break;
+    }
+    sendResponse({ success: true });
+  } catch (error) {
+    console.error('Failed to handle music control:', error);
+    sendResponse({ success: false, error: String(error) });
+  }
+  return true;
+});
+
+// Handle messages from offscreen document
+chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
+  console.log('Background received message:', message);
+
+  if (message.source === "offscreen") {
+    // Forward audio state to popup
+    chrome.runtime.sendMessage({
+      ...message,
+      target: "popup",
+      source: "background"
+    });
+  }
+
+  // Handle GET_AUDIO_STATE request from popup
+  if (message.type === 'GET_AUDIO_STATE' && message.source === 'popup') {
+    chrome.runtime.sendMessage({
+      type: 'GET_STATE',
+      target: "offscreen",
+      source: "background"
+    });
+  }
+
+  return true;
+});
+
+chrome.runtime.onMessage.addListener(async (message) => {
+  if (message.type === 'DOCUMENT_CLOSED') {
+    hasOffscreen = false;
+    // Recreate if audio is still playing
+    if (message.isPlaying) {
+      await createOffscreenDocument('html/offscreen.html');
+    }
+  }
+});
+
 chrome.runtime.onMessage.addListener(function (request, sender, sendResponse) {
   if (request.redirect) {
     if (checkDisable()) {
@@ -124,7 +242,7 @@ chrome.alarms.onAlarm.addListener(async (alarm) => {
 
 checkAlarm();
 
-chrome.storage.local.get((res) => {
+chrome.storage.local.get((res:any) => {
   const dailyTime = res.dailyTime || [];
   const weeklyTime = res.weeklyTime || [];
   const monthlyTime = res.monthlyTime || [];

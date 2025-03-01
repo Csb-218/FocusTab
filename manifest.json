@@ -26,7 +26,11 @@
   ],
   "web_accessible_resources": [
     {
-      "resources": ["images/recenter_logo.png", "images/gifs/*.gif", "images/documentation/*.png"],
+      "resources": [
+        "images/recenter_logo.png",
+        "images/gifs/*.gif",
+        "images/documentation/*.png"
+      ],
       "matches": ["<all_urls>"]
     }
   ],
@@ -38,6 +42,7 @@
     "history",
     "alarms",
     "idle",
-    "sidePanel"
+    "sidePanel",
+    "offscreen"
   ]
 }
