@@ -23,7 +23,7 @@ export class ProactiveTimer {
         }
       }
     });
-    chrome.storage.local.get(async (res) => {
+    chrome.storage.local.get(async (res:any) => {
       if (!res) {
         return;
       }
